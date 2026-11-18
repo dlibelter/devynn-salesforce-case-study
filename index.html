@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce AI Case Study</title>
+<meta name="description" content="A UX research case study: what finance teams actually want from AI. Devynn Li Belter, UC Berkeley MIMS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Mono:wght@400;500&family=Montagu+Slab:opsz,wght@16..144,200..600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout idea: one long dark-green scroll story. Left-aligned editorial type, an energy gradient (orange to pink) used only for information in motion. */
+  --bg:#04170c;
+  --bg-2:#082414;
+  --panel:rgba(238,240,226,.045);
+  --line:rgba(238,240,226,.14);
+  --ink:#eef0e2;
+  --mute:rgba(238,240,226,.66);
+  --leaf:#a8c46a;
+  --olive:#565d33;
+  --orange:#e9672b;
+  --pink:#f4bfed;
+  --cream:#f1ebd8;
+  --energy:linear-gradient(100deg,#e9672b 0%,#f4bfed 100%);
+  --display:'Montagu Slab',Georgia,'Times New Roman',serif;
+  --body:'Source Serif 4',Georgia,serif;
+  --mono:'DM Mono',ui-monospace,Menlo,monospace;
+  --gutter:clamp(24px,7vw,120px);
+  --max:1240px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.25vw,20px);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,svg,canvas{max-width:100%;display:block}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--pink);outline-offset:3px;border-radius:6px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gutter)}
+h1,h2,h3{font-family:var(--display);font-weight:300;line-height:1.04;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:clamp(34px,5vw,72px)}
+h3{font-size:clamp(22px,2.2vw,30px);font-weight:400;letter-spacing:-.01em;line-height:1.15}
+p{max-width:62ch;text-wrap:pretty}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.eyebrow{display:flex;align-items:center;gap:14px;color:var(--mute);margin-bottom:28px}
+.eyebrow b{font-weight:500;color:var(--leaf)}
+.eyebrow i{display:block;height:1px;width:56px;background:var(--line)}
+.grad{background:var(--energy);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mute{color:var(--mute)}
+section{position:relative;padding:clamp(80px,9vw,130px) 0}
+
+/* ambient atmosphere */
+.grain{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.aurora{position:absolute;inset:-10% -10% 0 -10%;z-index:0;pointer-events:none;overflow:hidden}
+.aurora span{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;will-change:transform}
+.aurora .a1{width:58vw;height:58vw;left:-12vw;top:-18vw;background:radial-gradient(circle,#2f4a1c 0%,transparent 66%);animation:drift1 26s ease-in-out infinite alternate}
+.aurora .a2{width:50vw;height:50vw;right:-10vw;top:4vw;background:radial-gradient(circle,rgba(233,103,43,.38) 0%,transparent 64%);animation:drift2 32s ease-in-out infinite alternate}
+.aurora .a3{width:46vw;height:46vw;right:16vw;top:22vw;background:radial-gradient(circle,rgba(244,191,237,.20) 0%,transparent 66%);animation:drift1 38s ease-in-out infinite alternate-reverse}
+@keyframes drift1{to{transform:translate3d(8vw,5vw,0) scale(1.15)}}
+@keyframes drift2{to{transform:translate3d(-9vw,6vw,0) scale(.9)}}
+.foliage{position:absolute;inset:0;z-index:0;opacity:.5;pointer-events:none;
+  background:
+    repeating-linear-gradient(112deg,transparent 0 22px,rgba(120,150,70,.07) 22px 26px,transparent 26px 58px),
+    repeating-linear-gradient(108deg,transparent 0 40px,rgba(30,70,30,.35) 40px 49px,transparent 49px 97px);
+  filter:blur(6px);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 78%);mask-image:linear-gradient(180deg,#000 0%,transparent 78%)}
+
+/* nav */
+.nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:4px;padding:6px;border:1px solid var(--line);border-radius:999px;background:rgba(4,23,12,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:9px 14px;border-radius:999px;color:var(--mute);white-space:nowrap;transition:color .25s,background .25s}
+.nav a:hover{color:var(--ink)}
+.nav a.on{color:var(--bg);background:var(--cream)}
+.progress{position:fixed;left:0;top:0;height:2px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--energy);z-index:60}
+
+/* hero */
+.hero{position:relative;padding:clamp(120px,14vw,170px) 0 60px;min-height:760px;overflow:hidden}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+.hero .wrap{position:relative;z-index:2;pointer-events:none}
+.hero .wrap *{pointer-events:auto}
+.hero .tag{display:flex;gap:18px;flex-wrap:wrap;color:var(--mute);margin-bottom:clamp(36px,6vw,70px)}
+.hero .tag b{color:var(--ink);font-weight:500}
+.hero h1{font-size:clamp(46px,7.4vw,118px);max-width:9.6em;margin-bottom:30px}
+.hero h1 em{font-style:normal}
+.hero .lede{font-size:clamp(18px,1.5vw,22px);color:var(--mute);max-width:36ch}
+.hero .lede b{color:var(--ink);font-weight:500}
+.hero .hint{position:absolute;z-index:3;right:var(--gutter);bottom:26px;display:flex;align-items:center;gap:12px;color:var(--mute)}
+.pause{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;letter-spacing:.12em}
+.pause:hover{border-color:var(--pink)}
+.scrollcue{position:absolute;z-index:3;left:var(--gutter);bottom:26px;color:var(--mute)}
+
+/* meta strip */
+.meta{margin-top:clamp(56px,7vw,110px);display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.meta div{padding:26px 22px 28px 0}
+.meta div+div{padding-left:22px;border-left:1px solid var(--line)}
+.meta .mono{color:var(--leaf);display:block;margin-bottom:10px}
+.meta p{font-size:.95em;line-height:1.45;color:var(--ink)}
+
+/* scrub statement */
+.scrub{font-family:var(--display);font-weight:300;font-size:clamp(28px,4vw,58px);line-height:1.18;letter-spacing:-.015em;max-width:21em}
+.scrub .w{opacity:.26;transition:opacity .25s}
+.scrub .w.lit{opacity:1}
+.chips{display:flex;flex-wrap:wrap;gap:12px;margin-top:44px}
+.chip{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;padding:10px 18px;font-size:.92em;background:var(--panel)}
+.chip b{font-family:var(--display);font-weight:400;font-size:1.25em;color:var(--pink)}
+.pull{margin-top:70px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start;max-width:760px}
+.pull svg{width:38px;margin-top:6px;fill:var(--orange)}
+.pull p{font-family:var(--display);font-weight:300;font-size:clamp(22px,2.6vw,34px);line-height:1.25;max-width:none}
+.pull cite{display:block;margin-top:14px;font-style:normal;color:var(--mute)}
+
+/* chart */
+.split{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(28px,5vw,80px);align-items:center}
+.chartcard{position:relative;border:1px solid var(--line);border-radius:22px;background:linear-gradient(160deg,rgba(238,240,226,.06),rgba(238,240,226,.015));padding:14px 14px 10px}
+.chartcard svg{width:100%;height:auto;overflow:visible}
+.ax{stroke:rgba(238,240,226,.28);stroke-width:1.2}
+.axl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;fill:var(--mute);text-transform:uppercase}
+.pt{cursor:pointer;outline:none}
+.pt circle.d{fill:var(--cream);transition:r .25s,fill .25s}
+.pt text{font-family:var(--display);font-size:16px;fill:var(--ink)}
+.pt:hover circle.d,.pt:focus-visible circle.d{r:9;fill:var(--pink)}
+.pt.sf circle.d{fill:var(--orange)}
+.pt.sf text{font-weight:500;fill:var(--cream);font-size:19px}
+.halo{fill:var(--orange);opacity:.22;animation:halo 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes halo{50%{transform:scale(1.7);opacity:.06}}
+.gap{stroke:url(#eg);stroke-width:2.6;stroke-dasharray:7 7;animation:dash 1.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-28}}
+.tip{position:absolute;pointer-events:none;background:var(--cream);color:#12220f;border-radius:10px;padding:8px 12px;font-size:14px;line-height:1.3;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;max-width:220px;z-index:5}
+.tip.show{opacity:1;transform:none}
+.note{font-size:.82em;color:var(--mute);margin-top:12px;padding-left:4px}
+.callout{border-left:2px solid var(--orange);padding:4px 0 4px 20px;margin-top:30px}
+.callout p+p{margin-top:12px}
+.callout b{font-weight:600;color:var(--cream)}
+
+/* research */
+.roles{display:flex;flex-wrap:wrap;gap:12px;margin:28px 0 8px}
+.role{border-radius:999px;padding:11px 20px;background:var(--olive);color:var(--cream);font-size:.95em;font-weight:500}
+
+.qs{display:grid;gap:14px;margin-top:30px;padding:0;list-style:none}
+.qs li{display:grid;grid-template-columns:44px 1fr;gap:6px;align-items:baseline;border-top:1px solid var(--line);padding-top:14px}
+.qs li .mono{color:var(--leaf)}
+.quote{margin-top:clamp(60px,8vw,110px);display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:clamp(28px,5vw,80px);align-items:center}
+.quote blockquote{font-family:var(--display);font-weight:300;font-size:clamp(28px,4vw,56px);line-height:1.12;letter-spacing:-.02em;text-wrap:balance}
+.quote blockquote b{font-weight:500}
+.quote cite{display:block;margin-top:22px;font-style:normal;color:var(--mute)}
+.mentor{margin-top:10px;max-width:960px}
+.mentor blockquote{font-family:var(--display);font-weight:300;font-size:clamp(28px,3.6vw,52px);line-height:1.18;letter-spacing:-.015em;text-wrap:balance;position:relative;padding-left:clamp(0px,2vw,28px);border-left:3px solid var(--orange)}
+.mentor figcaption{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:baseline;margin-top:30px;padding-left:clamp(0px,2vw,28px);color:var(--mute)}
+.mentor .who{font-family:var(--display);font-size:1.2em;color:var(--ink)}
+.mentor a{text-decoration:none;border-bottom:1px solid var(--line);color:var(--leaf)}
+.mentor a:hover{border-color:var(--pink)}
+.dots20{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,1.4vw,18px);max-width:300px}
+.dots20 span{aspect-ratio:1;border-radius:50%;border:1px solid var(--line);background:var(--panel)}
+.dots20 span.on{background:var(--energy);border-color:transparent;box-shadow:0 0 30px rgba(233,103,43,.75),0 0 60px rgba(244,191,237,.35)}
+.dots20+p{margin-top:16px;color:var(--mute);font-size:.9em}
+.dots20+p b{color:var(--ink);font-weight:500}
+
+/* affinity + survey */
+.sub{margin-top:clamp(70px,9vw,120px)}
+.sub h3{margin-bottom:12px}
+.affwrap{margin-top:30px;border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:10px}
+.aff{width:100%;height:auto}
+.aff circle{transition:transform 1.5s cubic-bezier(.2,.8,.2,1)}
+.aff text{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;fill:var(--ink)}
+.bars{display:grid;gap:18px;margin-top:34px}
+.bar{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 58px;gap:20px;align-items:center}
+.bar .track{height:14px;border-radius:99px;background:rgba(238,240,226,.1);overflow:hidden}
+.bar .fill{display:block;height:100%;width:calc(var(--v)*100%);border-radius:99px;background:var(--energy);transform-origin:0 50%}
+.bar .val{font-family:var(--display);font-size:1.35em;text-align:right}
+.bar .val small{font-family:var(--mono);font-size:.5em;color:var(--mute)}
+.caveat{margin-top:26px;padding:14px 18px;border:1px dashed var(--line);border-radius:14px;color:var(--mute);font-size:.92em;max-width:62ch}
+
+/* findings */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px}
+.card{position:relative;border:1px solid var(--line);border-radius:22px;padding:28px 26px 26px;background:linear-gradient(170deg,rgba(238,240,226,.07),rgba(238,240,226,.015));display:flex;flex-direction:column;gap:16px;overflow:hidden;transition:transform .35s,border-color .35s}
+.card::after{content:"";position:absolute;inset:auto -20% -60% -20%;height:70%;background:radial-gradient(closest-side,rgba(233,103,43,.28),transparent);opacity:0;transition:opacity .4s}
+.card:hover{border-color:rgba(244,191,237,.5)}
+.card:hover::after{opacity:1}
+.card .num{font-family:var(--display);font-size:56px;font-weight:200;line-height:1;color:var(--leaf)}
+.card p{color:var(--mute)}
+.ev{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--pink)}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:clamp(60px,8vw,100px)}
+.vs>div{border-radius:26px;padding:clamp(26px,4vw,52px);min-height:300px;display:flex;flex-direction:column;justify-content:space-between;gap:30px}
+.vs .was{border:1px solid var(--line);color:var(--mute);background:var(--panel)}
+.vs .now{background:linear-gradient(140deg,var(--olive),#2f4a1c 60%,#1a2a12);position:relative;overflow:hidden}
+.vs .now::before{content:"";position:absolute;right:-20%;top:-30%;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(233,103,43,.55),rgba(244,191,237,.18) 50%,transparent 70%)}
+.vs .now>*{position:relative}
+.vs p{font-family:var(--display);font-weight:300;font-size:clamp(24px,3vw,42px);line-height:1.14;max-width:none;letter-spacing:-.015em}
+.vs .was{position:relative;overflow:visible}
+.vs .was .xmark{position:absolute;left:-4%;top:-9%;width:108%;height:118%;overflow:visible;pointer-events:none;z-index:3;transform:rotate(-3deg)}
+.xmark .dr{stroke-dasharray:1;stroke-dashoffset:1}
+.vs.draw .xmark .dr{animation:drawx .7s cubic-bezier(.5,.1,.3,1) forwards}
+.vs.draw .xmark .d2{animation-delay:.35s}.vs.draw .xmark .d3{animation-delay:.85s}.vs.draw .xmark .d4{animation-delay:1.2s}
+@keyframes drawx{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.xmark .dr{stroke-dashoffset:0}}
+.vs .now p{color:var(--cream)}
+
+/* recommendation */
+.rec{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(30px,5vw,80px);margin-top:50px;align-items:start}
+.princ{list-style:none;display:grid;gap:0}
+.princ li{border-top:1px solid var(--line)}
+.princ li:last-child{border-bottom:1px solid var(--line)}
+.princ button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:54px 1fr;gap:6px;padding:24px 8px 24px 0;font-family:var(--display);font-size:clamp(21px,2.3vw,32px);font-weight:300;line-height:1.18;letter-spacing:-.01em;opacity:.62;transition:opacity .3s,padding .3s}
+.princ button .mono{color:var(--leaf);padding-top:.6em}
+.princ button:hover,.princ button:focus-visible,.princ button[aria-pressed=true]{opacity:1;padding-left:10px}
+.princ button:focus-visible{outline:2px solid var(--pink)}
+.dcard{border:1px solid var(--line);border-radius:26px;background:linear-gradient(165deg,rgba(238,240,226,.06),rgba(238,240,226,.012));padding:18px;position:sticky;top:90px}
+.diagram{width:100%;height:auto}
+.diagram g{transition:opacity .35s}
+.diagram[data-active] g[data-p]{opacity:.18}
+.diagram[data-active="1"] g[data-p="1"],.diagram[data-active="2"] g[data-p="2"],.diagram[data-active="3"] g[data-p="3"],.diagram[data-active="4"] g[data-p="4"]{opacity:1}
+.diagram .tbox{fill:#e8dbd0}
+.diagram .tt{fill:#565d33;font-size:20px}
+.diagram .ar{stroke:#e9672b;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.diagram .box{fill:rgba(238,240,226,.08);stroke:rgba(238,240,226,.3)}
+.diagram text{font-family:var(--body);fill:var(--ink);font-size:15px}
+.diagram .head{stroke:#f4bfed;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.diagram .person circle,.diagram .person path{fill:#a8c46a}
+.diagram .m{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;fill:var(--mute)}
+.flow{stroke:url(#eg2);stroke-width:2.4;fill:none;stroke-dasharray:6 8;animation:dash 1.2s linear infinite}
+.dcap{margin-top:10px;padding:0 6px 4px;font-size:.82em;color:var(--mute)}
+.open{margin-top:clamp(70px,9vw,120px);padding:clamp(28px,4vw,52px);border-radius:28px;border:1px solid rgba(244,191,237,.3);background:radial-gradient(120% 140% at 85% 0%,rgba(233,103,43,.22),transparent 55%),var(--panel)}
+.open p{font-family:var(--display);font-weight:300;font-size:clamp(26px,3.4vw,48px);line-height:1.14;max-width:22em;letter-spacing:-.015em}
+.open .mono{color:var(--leaf);display:block;margin-bottom:18px}
+
+/* learnings */
+.huge{font-family:var(--display);font-weight:200;font-size:clamp(46px,8vw,128px);line-height:.98;letter-spacing:-.03em;max-width:8.4em;text-wrap:balance}
+.ethos{margin-top:34px;max-width:30em;font-family:var(--display);font-weight:300;font-size:clamp(22px,2.6vw,36px);line-height:1.22}
+.ethos i{font-style:italic;font-family:var(--body);color:var(--pink)}
+.swap{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:stretch;margin-top:clamp(60px,8vw,100px)}
+.swap>div{border-radius:22px;padding:30px;display:flex;flex-direction:column;gap:14px}
+.swap .exp{border:1px solid var(--line);background:var(--panel)}
+.swap .act{background:var(--olive)}
+.swap .mono{color:var(--leaf)}
+.swap .act .mono{color:var(--cream);opacity:.8}
+.swap p{font-family:var(--display);font-weight:300;font-size:clamp(20px,2.1vw,28px);line-height:1.22;max-width:none}
+.swap .arr{display:grid;place-items:center;color:var(--orange)}
+.swap .arr svg{width:54px}
+.adapt{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.adapt div{border-top:1px solid var(--line);padding-top:16px}
+.adapt .mono{color:var(--leaf);display:block;margin-bottom:8px}
+.next{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:clamp(60px,8vw,100px);counter-reset:s}
+.step:not(:last-child)::after{content:"";position:absolute;right:-17px;top:50%;width:16px;height:16px;border-top:2.4px solid var(--orange);border-right:2.4px solid var(--orange);transform:translateY(-50%) rotate(45deg) scale(.7)}
+@media(max-width:860px){.step:not(:last-child)::after{display:none}}
+.step{position:relative;border-radius:22px;padding:28px;border:1px solid var(--line);background:var(--panel);min-height:210px;display:flex;flex-direction:column;gap:10px}
+.step:nth-child(1){background:var(--pink);color:#2a3412;border-color:transparent}
+.step:nth-child(2){background:var(--beige,#e8dbd0);color:#2a3412;border-color:transparent}
+.step:nth-child(3){background:var(--orange);color:var(--cream);border-color:transparent}
+.step .n{font-family:var(--display);font-weight:200;font-size:72px;line-height:1}
+.step h3{font-weight:500}
+.step p{font-size:.95em;opacity:.9}
+footer{padding:clamp(60px,8vw,100px) 0 60px;border-top:1px solid var(--line)}
+footer .fcols{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px}
+footer .fbrand .name{font-family:var(--display);font-weight:300;font-size:clamp(24px,2.6vw,34px);margin-bottom:10px}
+footer .fbrand p:last-child{color:var(--mute);max-width:34ch}
+footer .fcol{display:flex;flex-direction:column;gap:10px}
+footer .fcol h5{font-weight:400;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--leaf);margin-bottom:6px}
+footer .fcol a{text-decoration:none;color:var(--ink);width:fit-content;border-bottom:1px solid transparent}
+footer .fcol a:hover,footer .fcol a:focus-visible{border-color:var(--pink)}
+footer .fbottom{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
+footer .copy{font-size:11px;letter-spacing:.12em;color:var(--mute)}
+@media(max-width:760px){footer .fcols{grid-template-columns:1fr 1fr}footer .fbrand{grid-column:1/-1}}
+footer .big{font-family:var(--display);font-weight:200;font-size:clamp(40px,7vw,104px);line-height:1;letter-spacing:-.03em}
+footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-top:50px;color:var(--mute)}
+footer .row p{max-width:52ch;font-size:.9em}
+footer a.top{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:10px 16px;align-self:flex-start}
+footer a.top:hover{border-color:var(--pink)}
+
+/* affinity board */
+.canvas{position:relative;margin-top:34px;height:clamp(460px,76vh,720px);border-radius:24px;overflow:hidden;cursor:grab;touch-action:none;border:10px solid #4a2f17;box-shadow:inset 0 0 60px rgba(60,30,8,.55),0 24px 60px rgba(0,0,0,.4);background-color:#b9894f;background-image:radial-gradient(rgba(90,55,20,.34) 1.2px,transparent 1.8px),radial-gradient(rgba(255,230,180,.22) 1px,transparent 1.6px),radial-gradient(rgba(70,40,12,.25) 2px,transparent 2.6px);background-size:11px 11px,17px 17px,29px 29px;background-position:0 0,5px 7px,13px 3px;user-select:none;-webkit-user-select:none}
+.canvas:focus-visible{outline:2px solid var(--pink);outline-offset:3px}
+.canvas.panning{cursor:grabbing}
+.world{position:absolute;left:0;top:0;width:1800px;height:1560px;will-change:transform}
+.strings{position:absolute;left:0;top:0;z-index:4;pointer-events:none;overflow:visible}
+.strings path{fill:none;stroke-linecap:round}
+.strings .str{stroke:#c7381f;stroke-width:2.6;filter:drop-shadow(0 3px 2px rgba(40,10,0,.4))}
+.strings .usr{stroke:#8a1f6b;stroke-width:2.6;filter:drop-shadow(0 3px 2px rgba(40,10,0,.4))}
+.strings .hit{stroke:transparent;stroke-width:18;pointer-events:stroke;cursor:pointer}
+.strings .tmp{stroke:#8a1f6b;stroke-width:2.6;stroke-dasharray:2 7;opacity:.9}
+.cluster{position:absolute;padding:0;width:300px;z-index:1;transform:rotate(var(--cr,0deg))}
+.cluster h4{position:relative;display:inline-block;margin:0 0 18px 6px;padding:9px 16px 9px 28px;background:#f6f0dc;color:#2a2410;font-family:var(--display);font-weight:400;font-size:19px;line-height:1.15;border-radius:2px;box-shadow:0 5px 12px rgba(40,20,0,.35);transform:rotate(-1.4deg)}
+.notes{display:grid;gap:16px}
+.pin{position:absolute;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff8a73,#c7381f 62%,#7a1d0e);box-shadow:0 3px 5px rgba(40,10,0,.55);cursor:crosshair;z-index:6;transition:transform .15s}
+.pinb{left:50%;bottom:-8px;margin-left:-8px}
+.strip{position:absolute;z-index:5;min-width:120px;padding:15px 20px 11px;background:#fbf9f1;box-shadow:0 8px 16px rgba(40,20,0,.38);transform:rotate(var(--sr,0deg));white-space:nowrap;pointer-events:auto}
+.strip .pin{left:50%;top:-6px;margin-left:-8px}
+.strip span{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:28px;line-height:1;color:#e9672b;filter:url(#pencilT)}
+.pin::before{content:"";position:absolute;inset:-9px}
+.pin:hover,.pin.hot{transform:scale(1.45)}
+.cluster h4 .pin{left:7px;top:50%;margin-top:-8px}
+.sticky .pin{left:50%;top:-6px;margin-left:-8px}
+.polaroid{position:absolute;width:172px;margin:0;padding:10px 10px 14px;background:#f8f5ea;box-shadow:0 14px 28px rgba(40,20,0,.45);transform:rotate(var(--pr,0deg));z-index:1}
+.polaroid .pin{left:50%;top:-7px;margin-left:-8px}
+.polaroid .ph{aspect-ratio:4/3;overflow:hidden;background:#ddd}
+.polaroid .ph svg{display:block;width:100%;height:100%}
+.polaroid figcaption{font-family:'Caveat',cursive;font-size:21px;line-height:1;margin-top:8px;color:#2a2410;text-align:center}
+.pen{position:absolute;z-index:3;font-family:'Caveat',cursive;font-weight:700;font-size:30px;line-height:1;color:#e9672b;white-space:nowrap;transform:rotate(var(--nr,0deg));filter:url(#pencilT);pointer-events:none}
+.cv-hint{position:absolute;left:16px;bottom:14px;z-index:8;background:rgba(4,23,12,.82);color:var(--ink);padding:8px 14px;border-radius:999px;font-size:10.5px;pointer-events:none}
+.cv-tools{position:absolute;right:14px;bottom:12px;z-index:8;display:flex;gap:8px}
+.cv-tools button{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;background:rgba(4,23,12,.82);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+.cv-tools button:hover,.cv-tools button:focus-visible{border-color:var(--pink)}
+
+.sticky{position:relative;transform:rotate(var(--r,-1deg));font-family:var(--body);font-size:14.5px;line-height:1.38;padding:14px 15px 15px;border-radius:3px;color:#2a2410;box-shadow:0 10px 24px rgba(0,0,0,.3);transform:rotate(var(--r,-1deg));transition:transform .25s ease-out,box-shadow .25s}
+.notes .sticky:nth-child(2n){--r:1.3deg;margin-left:12px}.notes .sticky:nth-child(3n){--r:-1.7deg;margin-right:10px}
+.sticky.o{background:#fbc78d}.sticky.s{background:#ffab9e}.sticky.a{background:#9eecea}.sticky.g{background:#a7ecb1}.sticky.p{background:#ff9ad5}.sticky.b{background:#9fd2ff}.sticky.v{background:#d2b4ff}.sticky.y{background:#ffd98a}
+.evs{margin-top:auto;display:grid;gap:12px}
+.evs .q{font-family:var(--display);font-weight:300;font-size:1.02em;line-height:1.32;color:var(--ink);border-left:2px solid var(--pink);padding-left:14px;max-width:none}
+.evs .q cite{display:block;margin-top:8px;font-style:normal;font-size:10.5px;color:var(--mute)}
+.evs .ev{margin-top:0;padding-top:12px}
+/* hero: greens and yellows */
+.hero{touch-action:pan-y}
+.aurora .a2{background:radial-gradient(circle,rgba(214,224,98,.26) 0%,transparent 64%)}
+.aurora .a3{background:radial-gradient(circle,rgba(120,170,70,.28) 0%,transparent 66%)}
+.hero .grad{background:linear-gradient(100deg,#9fc25f,#f0ee86);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* mouse-driven layer */
+.aurora,.foliage{transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.aurora{transform:translate3d(calc(var(--mx,0)*-34px),calc(var(--my,0)*-22px),0)}
+.foliage{transform:translate3d(calc(var(--mx,0)*18px),calc(var(--my,0)*10px),0) scale(1.04)}
+.tilt{position:relative;overflow:hidden;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out,border-color .35s;will-change:transform}
+.spot{position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:radial-gradient(300px circle at var(--mx,50%) var(--my,-50%),rgba(244,191,237,.22),transparent 62%);opacity:0;transition:opacity .3s}
+.tilt:hover .spot{opacity:1}
+.ch{display:inline-block;transition:font-weight .18s ease-out}
+.role{display:inline-block;transition:transform .25s ease-out}
+.dots20 span{transition:transform .18s ease-out}
+.follow{position:fixed;left:0;top:0;z-index:45;pointer-events:none;width:232px;border-radius:16px;padding:14px 16px 16px;background:var(--cream);color:#12220f;box-shadow:0 24px 60px rgba(0,0,0,.5);opacity:0;transition:opacity .22s}
+.follow.show{opacity:1}
+.follow .fg{height:46px;border-radius:10px;margin-bottom:12px;background:var(--energy);position:relative;overflow:hidden}
+.follow .fg::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--gx,30%) 50%,rgba(255,255,255,.7),transparent 55%)}
+.follow .fm{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#565d33;display:block;margin-bottom:5px}
+.follow .ft{font-size:15px;line-height:1.3}
+.rolewrap{position:relative}
+.ghost{position:absolute;left:0;top:0;pointer-events:none;display:flex;align-items:flex-start;font-family:var(--mono);font-size:11px;letter-spacing:.04em;z-index:3}
+.ghost svg{width:16px;height:20px;flex:none}
+.ghost span{margin:15px 0 0 -3px;padding:5px 11px;border-radius:12px;white-space:nowrap}
+.ghost.g1{animation:gA 11s ease-in-out infinite alternate}
+.ghost.g2{animation:gB 14s ease-in-out infinite alternate}
+.ghost.g3{animation:gC 17s ease-in-out infinite alternate}
+@keyframes gA{0%{transform:translate(8%,40px)}50%{transform:translate(140px,-26px)}100%{transform:translate(52%,70px)}}
+@keyframes gB{0%{transform:translate(70%,-34px)}50%{transform:translate(30%,92px)}100%{transform:translate(92%,34px)}}
+@keyframes gC{0%{transform:translate(38%,110px)}50%{transform:translate(78%,-20px)}100%{transform:translate(12%,20px)}}
+body.still .ghost{animation-play-state:paused}
+body.still .hero *,body.still .aurora span,body.still .halo,body.still .gap,body.still .flow{animation-play-state:paused!important}
+@media (hover:none),(max-width:900px){.ghost,.follow{display:none}}
+@media (max-width:900px){
+  .meta{grid-template-columns:1fr 1fr}
+  .meta div:nth-child(3){border-left:0;padding-left:0}
+  .meta div:nth-child(n+3){border-top:1px solid var(--line)}
+  .split,.quote,.rec{grid-template-columns:1fr}
+  .cards,.next{grid-template-columns:1fr}
+  .vs{grid-template-columns:1fr}
+  .swap{grid-template-columns:1fr}
+  .swap .arr{transform:rotate(90deg);padding:4px 0}
+  .adapt{grid-template-columns:1fr}
+  .dcard{position:static}
+  .bar{grid-template-columns:1fr 54px;gap:8px 14px}
+  .bar .track{grid-column:1 / -1;grid-row:2}
+  .hero{min-height:880px}
+  .hero .hint{bottom:14px}
+  .scrollcue{display:none}
+}
+@media (max-width:520px){
+  .meta{grid-template-columns:1fr}
+  .meta div{border-left:0!important;padding-left:0!important;border-top:1px solid var(--line)}
+  .meta div:first-child{border-top:0}
+  .nav a{padding:9px 11px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .ghost{animation:none}
+  .aurora,.foliage{transform:none}
+  .aurora span,.halo,.gap,.flow{animation:none}
+  .aff circle{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Sections">
+  <a href="#top">Introduction</a>
+  <a href="#context">Context</a>
+  <a href="#research">Research</a>
+  <a href="#findings">Findings</a>
+  <a href="#recommendation">Recommendations</a>
+  <a href="#learnings">Learnings</a>
+  <a href="#review">Review</a>
+</nav>
+
+<header class="hero" id="top">
+  <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+  <div class="foliage" aria-hidden="true"></div>
+  <canvas id="net" aria-label="Abstract animated grid of green and yellow light that ripples and bends when you drag the mouse across it." role="img"></canvas>
+  <div class="wrap">
+    <div class="tag mono"><span><b>Devynn Li Belter</b></span><span>UX Research</span><span>Case study</span></div>
+    <h1>AI shouldn’t make the call. It should move the <em class="grad">information.</em></h1>
+    <p class="lede">What finance teams actually want from <b>Salesforce’s</b> AI, and the 12 weeks of research that uncovered it.</p>
+  </div>
+  <div class="hint mono"><button class="pause mono" id="pause" type="button" aria-pressed="false">Pause motion</button></div>
+</header>
+
+<main>
+<div class="wrap">
+  <div class="meta" aria-label="Project summary">
+    <div><span class="mono">Role</span><p>UX Research intern, on a team of 4</p></div>
+    <div><span class="mono">Timeline</span><p>12 weeks, Spring 2026</p></div>
+    <div><span class="mono">Partner</span><p>Salesforce, through my UXR class at UC Berkeley MIMS</p></div>
+    <div><span class="mono">Methods</span><p>Competitive map, 5 interviews, affinity mapping, directional survey (12 responses)</p></div>
+  </div>
+</div>
+
+<section id="context">
+  <div class="wrap">
+    <div class="eyebrow mono"><b>01</b><i></i>The ask</div>
+    <p class="scrub" id="scrub">Salesforce Financial Services Cloud wanted AI to be the next big selling point for its finance clients, and the idea on the table was to automate financial decision-making and executive judgment, as long as it didn’t end up as just another dashboard.</p>
+    <div class="chips">
+      <span class="chip"><b>12</b> weeks</span>
+      <span class="chip"><b>4</b> person team</span>
+      <span class="chip">Limited budget and privacy constraints</span>
+    </div>
+
+    <div class="sub">
+      <div class="eyebrow mono"><b>02</b><i></i>Where Salesforce sits</div>
+      <div class="split">
+        <div>
+          <h2>Dominant for years, <span class="grad">now under pressure.</span></h2>
+          <div class="callout"><p>Salesforce has dominated Financial Cloud systems historically, but the rise of AI and AI-centered competition is pushing them to evolve to remain dominant.</p></div>
+        </div>
+        <div class="chartcard">
+          <svg id="chart" viewBox="0 0 800 540" role="img" aria-label="Competitor map. Salesforce has high workflow automation but only mid-level data standardization.">
+            <defs>
+              <linearGradient id="eg" x1="0" x2="1"><stop offset="0" stop-color="#e9672b"/><stop offset="1" stop-color="#f4bfed"/></linearGradient>
+            </defs>
+          </svg>
+          <div class="tip" id="tip"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="wrap">
+    <div class="eyebrow mono"><b>03</b><i></i>Research</div>
+    <h2>Start with the problems, <span class="grad">not the AI.</span></h2>
+    <div class="split" style="margin-top:46px;align-items:start">
+      <div>
+        <p>AI was the suggested solution. I wanted to begin with where Salesforce FSC is falling short today, so I ran semi-structured interviews to uncover the biggest pain points clients face.</p>
+        <ul class="qs">
+          <li><span class="mono">Q1</span><span>What are the biggest points of friction in day-to-day work?</span></li>
+          <li><span class="mono">Q2</span><span>Why do they happen?</span></li>
+          <li><span class="mono">Q3</span><span>Where could it improve?</span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="mono" style="color:var(--leaf)">Five interviews, with everyone’s identity kept confidential.</p>
+        <div class="rolewrap">
+        <div class="roles">
+          <span class="role">Bank VP</span><span class="role">International Tax Analyst</span><span class="role">FP&amp;A Risk Senior Consultant</span><span class="role">Banking Strategy Consultant</span><span class="role">Executive / CFO</span>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote">
+      <div>
+        <blockquote>“I only trust AI to operate without manual review for maybe <b class="grad">5%</b> of my tasks.”</blockquote>
+        <cite class="mono">Interview respondent</cite>
+      </div>
+      <div>
+        <div class="dots20" id="dots20" role="img" aria-label="One dot out of twenty is lit, representing five percent."></div>
+        <p><b>1 in 20 tasks</b> is something, but it’s not the overhaul Salesforce was imagining.</p>
+      </div>
+    </div>
+
+    <div class="sub">
+      <h3>Before jumping to conclusions, I looked for patterns.</h3>
+      <p class="mute">I built an affinity map from key interview quotes to find the themes people shared.</p>
+      <div class="canvas" id="aff" tabindex="0" role="group" aria-label="Affinity map pinned to a corkboard. Drag the board to look around. Drag from one pin to another to connect ideas.">
+        <div class="world" id="world">
+          <svg class="strings" id="strings" width="1800" height="1560" aria-hidden="true"><defs><filter id="pencilT" x="-5%" y="-20%" width="110%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="2" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="1.6" result="d"/><feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="5" result="g"/><feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3 0 0 0 -0.55" result="ga"/><feComposite in="d" in2="ga" operator="in"/></filter></defs><g id="gPre"></g><g id="gUser"></g><path id="gTemp" class="tmp" d=""/></svg>
+          <figure class="polaroid" style="left:150px;top:680px;--pr:-4deg"><i class="pin" data-pin="ph1"></i><div class="ph"><svg viewBox="0 0 160 120" aria-hidden="true"><rect width="160" height="120" fill="#d7e3b8"/><rect x="26" y="20" width="108" height="72" rx="6" fill="#f6f3e6" stroke="#565d33" stroke-width="3"/><path d="M26 44h108M26 66h108M62 20v72M98 20v72" stroke="#8a9a5a" stroke-width="2"/><circle cx="116" cy="82" r="14" fill="none" stroke="#e9672b" stroke-width="4"/><path d="M126 92l14 14" stroke="#e9672b" stroke-width="5" stroke-linecap="round"/></svg></div><figcaption>where is it?!</figcaption></figure><figure class="polaroid" style="left:640px;top:680px;--pr:3deg"><i class="pin" data-pin="ph2"></i><div class="ph"><svg viewBox="0 0 160 120" aria-hidden="true"><rect width="160" height="120" fill="#f4d3ef"/><rect x="14" y="26" width="58" height="40" rx="12" fill="#f6f3e6" stroke="#565d33" stroke-width="3"/><rect x="88" y="52" width="58" height="40" rx="12" fill="#565d33"/><path d="M72 46h14M80 40l8 6-8 6" fill="none" stroke="#e9672b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M88 74H74M82 68l-8 6 8 6" fill="none" stroke="#f6f3e6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><figcaption>lost in hand-offs</figcaption></figure><figure class="polaroid" style="left:1130px;top:680px;--pr:-3deg"><i class="pin" data-pin="ph3"></i><div class="ph"><svg viewBox="0 0 160 120" aria-hidden="true"><rect width="160" height="120" fill="#cfe4e0"/><path d="M58 56V42a22 22 0 0 1 44 0v14" fill="none" stroke="#565d33" stroke-width="7" stroke-linecap="round"/><rect x="44" y="54" width="72" height="50" rx="10" fill="#565d33"/><circle cx="80" cy="76" r="7" fill="#f1ebd8"/><path d="M80 80v12" stroke="#f1ebd8" stroke-width="5" stroke-linecap="round"/></svg></div><figcaption>who signs off?</figcaption></figure><div class="strip" data-str="0" style="--sr:-2deg"><i class="pin" data-pin="s1"></i><span>hunting, not analysing!!</span></div><div class="strip" data-str="1" style="--sr:2deg"><i class="pin" data-pin="s2"></i><span>lost between teams!</span></div><div class="strip" data-str="2" style="--sr:-2deg"><i class="pin" data-pin="s3"></i><span>trust ≠ automation!</span></div><div class="strip" style="left:390px;top:745px;--sr:2deg"><i class="pin" data-pin="s4"></i><span>tedious yes, risky no</span></div><div class="strip" style="left:880px;top:745px;--sr:-2deg"><i class="pin" data-pin="s5"></i><span>judgement stays human!</span></div><div class="strip" style="left:1340px;top:745px;--sr:2deg"><i class="pin" data-pin="s6"></i><span>people, not systems!!</span></div>
+          <section class="cluster" style="left:80px;top:900px;--cr:0.7deg"><h4><i class="pin" data-pin="manual"></i>Why manual work sticks around</h4><div class="notes"><div class="sticky o"><i class="pin" data-pin="manual1"></i>“With the new tools come the need for redesigns of the workflows.”</div><div class="sticky o"><i class="pin" data-pin="manual2"></i>“…when you introduce a new technology… you need to redesign the entire workflow. And this is the stressful part, because you need to redesign the roles and responsibilities.”</div><div class="sticky o"><i class="pin" data-pin="manual3"></i>“…these people who already work 10 hours a day or 15 hours a day… are fed up with everything. They just won’t get the buy in and the time.”</div></div><i class="pin pinb" data-pin="manual-b"></i></section><section class="cluster" style="left:80px;top:60px;--cr:-1deg"><h4><i class="pin" data-pin="hunt"></i>Hunting for data</h4><div class="notes"><div class="sticky s"><i class="pin" data-pin="hunt1"></i>“I gotta go check back in, look at the source of the data… but also source from who actually entered it in that system.”</div><div class="sticky s"><i class="pin" data-pin="hunt2"></i>“That data and that information was obviously sourced by someone else. It comes to me.”</div><div class="sticky s"><i class="pin" data-pin="hunt3"></i>“My typical day to day is a lot on conference calls and spreadsheets.”</div></div><i class="pin pinb" data-pin="hunt-b"></i></section><section class="cluster" style="left:860px;top:60px;--cr:-0.6deg"><h4><i class="pin" data-pin="trust"></i>Trust needs a person</h4><div class="notes"><div class="sticky a"><i class="pin" data-pin="trust1"></i>“You mess with people’s money. You mess with their emotions… You had to build rapport with people in order to have them trust you.”</div><div class="sticky a"><i class="pin" data-pin="trust2"></i>“AI can have hallucinations or it doesn’t understand the questions. The human aspect isn’t in AI yet.”</div><div class="sticky a"><i class="pin" data-pin="trust3"></i>“In the end of the day, it’s… less about the system and more about the person.”</div></div><i class="pin pinb" data-pin="trust-b"></i></section><section class="cluster" style="left:1250px;top:60px;--cr:1deg"><h4><i class="pin" data-pin="judge"></i>Judgement can’t be reduced to numbers</h4><div class="notes"><div class="sticky g"><i class="pin" data-pin="judge1"></i>“Obviously, there were reputational risks, political risks, as well as financial and legal risk that we needed to consider.”</div><div class="sticky g"><i class="pin" data-pin="judge2"></i>“The gut feeling. I think some people make really gut feelings. That isn’t necessarily something that could be automated.”</div><div class="sticky g"><i class="pin" data-pin="judge3"></i>“There is also always the risk of the person who is in charge, and the decision, how they affect the business processes.”</div></div><i class="pin pinb" data-pin="judge-b"></i></section><section class="cluster" style="left:1250px;top:900px;--cr:-1deg"><h4><i class="pin" data-pin="stakes"></i>High stakes, hard to hand over</h4><div class="notes"><div class="sticky p"><i class="pin" data-pin="stakes1"></i>“Any inaccuracy in the quarterly earnings report… could be very bad for the stock price.”</div><div class="sticky p"><i class="pin" data-pin="stakes2"></i>“It would be hard for AI to call these risks out… mistakes fall back on our reputation.”</div><div class="sticky p"><i class="pin" data-pin="stakes3"></i>[When asked what part of his work he would trust to be fully automated] “None.”</div></div><i class="pin pinb" data-pin="stakes-b"></i></section><section class="cluster" style="left:470px;top:900px;--cr:-0.8deg"><h4><i class="pin" data-pin="open"></i>Open to AI on tedious, lower-risk work</h4><div class="notes"><div class="sticky b"><i class="pin" data-pin="open1"></i>“Forecasting resources is manual labor… A model that can predict the information… would be amazing.”</div><div class="sticky b"><i class="pin" data-pin="open2"></i>“Note taking AI popped up here on Zoom… those are actually very cool.”</div><div class="sticky b"><i class="pin" data-pin="open3"></i>“That type of sort of tedious grunt work AI can do and can do better.”</div></div><i class="pin pinb" data-pin="open-b"></i></section><section class="cluster" style="left:860px;top:900px;--cr:0.6deg"><h4><i class="pin" data-pin="secure"></i>Secure access, from anywhere</h4><div class="notes"><div class="sticky v"><i class="pin" data-pin="secure1"></i>“I would like to see… a system in place that was secure enough to be legally covering all of the standards needed… to work from the office or from home.”</div><div class="sticky v"><i class="pin" data-pin="secure2"></i>“Pain points within job: have to go back to the same person again and again and again…”</div></div><i class="pin pinb" data-pin="secure-b"></i></section><section class="cluster" style="left:470px;top:60px;--cr:0.8deg"><h4><i class="pin" data-pin="hand"></i>Hand-off break down</h4><div class="notes"><div class="sticky y"><i class="pin" data-pin="hand1"></i>“A lot gets lost in email; sometimes the comprehension isn’t there.”</div><div class="sticky y"><i class="pin" data-pin="hand2"></i>“The root of that is working with resources across the globe… only get about two hours of overlap.”</div><div class="sticky y"><i class="pin" data-pin="hand3"></i>“It’s really just people issues… less about the system and more about the person.”</div></div><i class="pin pinb" data-pin="hand-b"></i></section>
+          
+          
+        </div>
+        <div class="cv-hint mono">Drag to explore. Drag from a pin to another pin to add string.</div>
+        <div class="cv-tools"><button type="button" id="cvReset">Reset view</button><button type="button" id="cvClear">Clear my strings</button></div>
+      </div>
+      <p class="note">A selection of the notes behind each theme. Quotes are from the five interviews. Photos are illustrations.</p>
+    </div>
+
+    <div class="sub" id="survey">
+      <h3>A small survey pointed the same way.</h3>
+      <p class="mute">I created a small, directional survey with 12 responses. It supports our interview findings in a few ways:</p>
+      <div class="bars" id="bars">
+        <div class="bar"><span>Lose 5+ hours a week to manual work</span><span class="track"><span class="fill" style="--v:.583"></span></span><span class="val">7<small>/12</small></span></div>
+        <div class="bar"><span>Say data entry would benefit most from automation</span><span class="track"><span class="fill" style="--v:.5"></span></span><span class="val">6<small>/12</small></span></div>
+        <div class="bar"><span>Cite no shared platform across teams</span><span class="track"><span class="fill" style="--v:1"></span></span><span class="val">12<small>/12</small></span></div>
+        <div class="bar"><span>Cite misaligned incentives</span><span class="track"><span class="fill" style="--v:.75"></span></span><span class="val">9<small>/12</small></span></div>
+        <div class="bar"><span>Cite security concerns</span><span class="track"><span class="fill" style="--v:.667"></span></span><span class="val">8<small>/12</small></span></div>
+      </div>
+      <p class="caveat">Recruiting was limited by our resources, so I used the survey to support the interview patterns, not to prove them.</p>
+    </div>
+  </div>
+</section>
+
+<section id="findings">
+  <div class="wrap">
+    <div class="eyebrow mono"><b>04</b><i></i>Findings</div>
+    <h2>Three findings that <span class="grad">changed the brief.</span></h2>
+    <div class="cards">
+      <article class="card"><span class="num">1</span><h3>Manual sourcing gap</h3><p>Time goes to hunting for data that other teams sourced but never uploaded to a central system.</p></article>
+      <article class="card"><span class="num">2</span><h3>Incentive misalignment</h3><p>Departments track data differently based on their own incentives, creating friction at hand-offs.</p></article>
+      <article class="card"><span class="num">3</span><h3>Mismatched expectations</h3><p>Salesforce assumed clients wanted judgment automation. Clients wanted the tedious work automated, with judgment reserved for humans who are accountable for it.</p></article>
+    </div>
+    <div class="vs">
+      <div class="was"><span class="mono">Salesforce assumed</span><p>The next level of AI was automating high-stakes decisions.</p><svg class="xmark" viewBox="0 0 560 320" preserveAspectRatio="none" aria-hidden="true">
+<defs><filter id="pencil" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.04 0.06" numOctaves="2" seed="4" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="3" result="d"/><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="9" result="g"/><feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3.2 0 0 0 -0.75" result="ga"/><feComposite in="d" in2="ga" operator="in"/></filter></defs>
+<g fill="none" stroke="#e9672b" stroke-linecap="round" filter="url(#pencil)">
+<path class="dr d1" pathLength="1" d="M12 14C150 70 340 196 548 308" stroke-width="12"/>
+<path class="dr d2" pathLength="1" d="M20 10C170 76 350 190 540 304" stroke-width="7" opacity=".75"/>
+<path class="dr d3" pathLength="1" d="M550 16C400 84 190 200 10 306" stroke-width="12"/>
+<path class="dr d4" pathLength="1" d="M542 10C390 76 200 196 18 302" stroke-width="7" opacity=".75"/>
+</g></svg></div>
+      <div class="now"><span class="mono" style="color:var(--cream)">But their clients want</span><p>Automation they can truly trust on the repetitive, tedious work.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="recommendation">
+  <div class="wrap">
+    <div class="eyebrow mono"><b>05</b><i></i>My Recommendations</div>
+    <h2>Re-imagine AI tools as a communication &amp; <span class="grad">information super-highway.</span></h2>
+    <div class="open">
+      <span class="mono">The opportunity</span>
+      <p>Instead of automating judgment, make AI the most trusted tool for moving information between teams, with the human keeping the final call.</p>
+    </div>
+    <div class="rec">
+      <ol class="princ" id="princ">
+        <li><button type="button" data-p="1" aria-pressed="false"><span class="mono">01</span><span>Move AI from making decisions to moving information.</span></button></li>
+        <li><button type="button" data-p="2" aria-pressed="false"><span class="mono">02</span><span>Keep people in charge of judgment.</span></button></li>
+        <li><button type="button" data-p="3" aria-pressed="false"><span class="mono">03</span><span>Replace siloed gatekeeping with standardized information-access protocol.</span></button></li>
+        <li><button type="button" data-p="4" aria-pressed="false"><span class="mono">04</span><span>Earn trust through transparency, and test privacy first.</span></button></li>
+      </ol>
+      <div class="dcard">
+        <svg class="diagram" id="diagram" viewBox="0 0 720 420" role="img" aria-label="Diagram: Finance, Tax and Risk teams share information in both directions with an AI librarian, and a human makes the final call.">
+          <g data-p="1">
+            <rect class="tbox" x="20" y="20" width="200" height="70" rx="12"/><text class="tt" x="120" y="63" text-anchor="middle">Finance team</text>
+            <rect class="tbox" x="260" y="20" width="200" height="70" rx="12"/><text class="tt" x="360" y="63" text-anchor="middle">Tax team</text>
+            <rect class="tbox" x="500" y="20" width="200" height="70" rx="12"/><text class="tt" x="600" y="63" text-anchor="middle">Risk team</text>
+            <rect x="20" y="210" width="680" height="104" rx="16" fill="#565d33"/>
+          </g>
+          <g data-p="3">
+            <path class="ar" d="M120 102V198M110 114l10-14 10 14M110 186l10 14 10-14"/>
+            <path class="ar" d="M360 102V198M350 114l10-14 10 14M350 186l10 14 10-14"/>
+            <path class="ar" d="M600 102V198M590 114l10-14 10 14M590 186l10 14 10-14"/>
+          </g>
+          <g data-p="4">
+            <text x="360" y="254" text-anchor="middle" style="fill:#f1ebd8;font-size:17px"><tspan font-weight="700">AI librarian:</tspan> stores what teams choose to share,</text>
+            <text x="360" y="280" text-anchor="middle" style="fill:#f1ebd8;font-size:17px">with a source on every item, and retrieves it on request</text>
+          </g>
+          <g data-p="2">
+            <rect x="170" y="338" width="380" height="58" rx="29" fill="#f4bfed"/>
+            <text x="360" y="374" text-anchor="middle" style="fill:#2a3412;font-weight:600;font-size:19px">A human makes the final call</text>
+          </g>
+        </svg>
+        <p class="dcap">A concept to test, not a validated design. Hover or tap a principle to see where it lives.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="learnings">
+  <div class="wrap">
+    <div class="eyebrow mono"><b>06</b><i></i>Learnings</div>
+    <h2 class="huge">The research told us <span class="grad">no.</span></h2>
+    <p class="ethos">Good user research is courageous. It’s <i>loyal to the user’s needs, and disloyal to your expectations.</i></p>
+
+    <div class="swap">
+      <div class="exp"><span class="mono">What we expected</span><p>AI that automates high-stakes decisions.</p></div>
+      <div class="arr" aria-hidden="true"><svg viewBox="0 0 54 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h46M38 3l11 9-11 9"/></svg></div>
+      <div class="act"><span class="mono">What users needed</span><p>AI that moves information, while people keep the call.</p></div>
+    </div>
+
+    <div class="eyebrow mono" style="margin-top:clamp(70px,9vw,120px)"><b>07</b><i></i>Next Steps</div>
+    <div class="next" style="margin-top:0">
+      <div class="step"><span class="n">1</span><h3>Prototype it</h3><p>An AI-powered Information Record &amp; Retrieval Interface.</p></div>
+      <div class="step"><span class="n">2</span><h3>Test Usability &amp; Acceptance</h3><p>How much capture people in regulated finance will accept, and can be naturally integrated into their existing workflow?</p></div>
+      <div class="step"><span class="n">3</span><h3>Measure success</h3><p>Hours saved per week and trust in retrieved data.</p></div>
+    </div>
+  </div>
+</section>
+<section id="review">
+  <div class="wrap">
+    <div class="eyebrow mono"><b>08</b><i></i>Salesforce’s review</div>
+    <figure class="mentor">
+      <blockquote>“The team did a great job understanding a complex domain within Financial Services. They successfully conducted interviews to explore how Intelligence can provide support in highly regulated, high-pressure environments.”</blockquote>
+      <figcaption><span class="who">Saish Gosavi</span><span class="mono">Salesforce mentor</span><a class="mono" href="https://www.linkedin.com/feed/update/urn:li:share:7458464105046126592/" target="_blank" rel="noopener">Read the original post ↗</a></figcaption>
+    </figure>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fcols">
+      <div class="fbrand"><p class="name">Devynn Li Belter</p><p>UX research case study. Salesforce, UC Berkeley MIMS.</p></div>
+      <nav class="fcol" aria-label="Page links"><h5 class="mono">Page</h5>
+        <a href="#top">Introduction</a><a href="#context">Context</a><a href="#research">Research</a><a href="#findings">Findings</a><a href="#recommendation">Recommendations</a><a href="#learnings">Learnings</a><a href="#review">Review</a>
+      </nav>
+      <div class="fcol"><h5 class="mono">Contact</h5>
+        <a href="mailto:dlibelter@berkeley.edu">dlibelter@berkeley.edu</a><a href="https://www.linkedin.com/in/devynnlibelter/" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+    <div class="fbottom"><p class="copy mono">© 2026 Devynn Li Belter</p><a class="top" href="#top">Back to top ↑</a></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var paused = reduce;
+  var NS = 'http://www.w3.org/2000/svg';
+  function $(s,r){return (r||document).querySelector(s)}
+  function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+  function svgEl(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+
+  /* ---------- scroll progress + nav state ---------- */
+  var prog=$('#progress');
+  var links=$$('.nav a');
+  var secs=['top','context','research','findings','recommendation','learnings','review'].map(function(id){return document.getElementById(id)});
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-innerHeight;
+    prog.style.transform='scaleX('+(h>0?Math.min(1,scrollY/h):0)+')';
+    var cur=0, mid=innerHeight*.35;
+    secs.forEach(function(s,i){ if(s.getBoundingClientRect().top<=mid) cur=i; });
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur&&cur>0)});
+    scrubUpdate();
+  }
+
+  /* ---------- word scrub ---------- */
+  var scrub=$('#scrub'), words=[];
+  if(scrub){
+    var txt=scrub.textContent.trim().split(/\s+/);
+    scrub.textContent='';
+    txt.forEach(function(w,i){var s=document.createElement('span');s.className='w lit';s.textContent=w+(i<txt.length-1?' ':'');scrub.appendChild(s);words.push(s)});
+  }
+  var scrubReady=false;
+  function scrubUpdate(){
+    if(!scrub||reduce)return;
+    var r=scrub.getBoundingClientRect();
+    var start=innerHeight*.88, end=innerHeight*.35;
+    var p=(start-r.top)/(start-end+r.height*.6);
+    if(r.top>innerHeight){ if(scrubReady) words.forEach(function(w){w.classList.remove('lit')}); return; }
+    scrubReady=true;
+    p=Math.max(0,Math.min(1,p));
+    var n=Math.round(p*words.length);
+    words.forEach(function(w,i){w.classList.toggle('lit',i<n||p>=1)});
+  }
+  addEventListener('scroll',onScroll,{passive:true});
+  addEventListener('resize',onScroll);
+
+  /* ---------- 5% dots ---------- */
+  var d20=$('#dots20');
+  for(var i=0;i<20;i++){var s=document.createElement('span');if(i===7)s.className='on';d20.appendChild(s)}
+
+  /* ---------- competitor chart ---------- */
+  (function(){
+    var svg=$('#chart'), tip=$('#tip');
+    var L=70,R=770,T=36,B=470, w=R-L, h=B-T;
+    // standardization (x) and automation (y), 0..1
+    var data=[
+      {n:'Accenture',x:.50,a:.50,note:'Mid on both axes'},
+      {n:'Dynamics 365',x:.82,a:.50,note:'Standardized data, moderate automation'},
+      {n:'Pega',x:.81,a:.72,note:'Strong automation, standardized data'},
+      {n:'Palantir',x:.95,a:.97,note:'High on both axes'},
+      {n:'Salesforce',x:.71,a:.95,note:'Powerful workflow automation. Limited back-end data standardization.',sf:true}
+    ];
+    function X(v){return L+v*w} function Y(a){return T+(1-a)*h}
+    var g=svgEl('g',{},svg);
+    svgEl('line',{x1:L,y1:Y(.5),x2:R,y2:Y(.5),class:'ax'},g);
+    svgEl('line',{x1:X(.5),y1:T,x2:X(.5),y2:B,class:'ax'},g);
+    function lab(t,x,y,anchor){var e=svgEl('text',{x:x,y:y,class:'axl','text-anchor':anchor||'middle'},g);e.textContent=t}
+    lab('High workflow automation & intelligence',X(.5),T-12);
+    lab('Low workflow automation & intelligence',X(.5),B+26);
+    lab('Low data',L+2,Y(.5)-26,'start');lab('standardization',L+2,Y(.5)-12,'start');
+    lab('High data',R-2,Y(.5)-26,'end');lab('standardization',R-2,Y(.5)-12,'end');
+    var sf=data.filter(function(d){return d.sf})[0];
+    svgEl('line',{x1:X(sf.x)+26,y1:Y(sf.a),x2:X(.9),y2:Y(sf.a),class:'gap'},g);
+    var gl=svgEl('text',{x:(X(sf.x)+X(.9))/2+10,y:Y(sf.a)+30,class:'axl','text-anchor':'middle',style:'fill:#f4bfed'},g);gl.textContent='the gap';
+    data.forEach(function(d){
+      var p=svgEl('g',{class:'pt'+(d.sf?' sf':''),tabindex:0,role:'img','aria-label':d.n+'. '+d.note},g);
+      var cx=X(d.x), cy=Y(d.a);
+      if(d.sf) svgEl('circle',{cx:cx,cy:cy,r:30,class:'halo'},p);
+      svgEl('circle',{cx:cx,cy:cy,r:d.sf?13:8,class:'d'},p);
+      var t=svgEl('text',{x:cx,y:cy+(d.sf?44:-18),'text-anchor':'middle'},p);t.textContent=d.n;
+      function show(){tip.textContent=d.n+': '+d.note;var box=svg.getBoundingClientRect(), k=box.width/800;tip.style.left=Math.min(box.width-200,Math.max(10,cx*k-90))+'px';tip.style.top=(cy*k+(d.sf?70:20))+'px';tip.classList.add('show')}
+      function hide(){tip.classList.remove('show')}
+      p.addEventListener('mouseenter',show);p.addEventListener('mouseleave',hide);p.addEventListener('focus',show);p.addEventListener('blur',hide);
+    });
+  })();
+
+  /* ---------- survey bars ---------- */
+  (function(){
+    var bars=$('#bars');
+    var fills=$$('.fill',bars);
+    if(reduce||!fills[0].animate)return;
+    var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){
+      fills.forEach(function(f,i){f.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:1100,delay:i*110,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'})});
+      io.disconnect()}})},{threshold:.4});
+    io.observe(bars);
+  })();
+
+  /* ---------- principles <-> diagram ---------- */
+  (function(){
+    var dg=$('#diagram'), btns=$$('#princ button');
+    function set(p){ if(p)dg.setAttribute('data-active',p); else dg.removeAttribute('data-active'); }
+    var pinned=null;
+    btns.forEach(function(b){
+      var p=b.getAttribute('data-p');
+      b.addEventListener('mouseenter',function(){set(p)});
+      b.addEventListener('mouseleave',function(){set(pinned)});
+      b.addEventListener('focus',function(){set(p)});
+      b.addEventListener('blur',function(){set(pinned)});
+      b.addEventListener('click',function(){
+        pinned=(pinned===p)?null:p;
+        btns.forEach(function(o){o.setAttribute('aria-pressed',String(o.getAttribute('data-p')===pinned))});
+        set(pinned);
+      });
+    });
+  })();
+
+  /* ---------- hero energy grid ---------- */
+  (function(){
+    var hero=$('#top'), cv=$('#net'), ctx=cv.getContext('2d');
+    var W=0,H=0,dpr=1,sp=44,cols=0,rows=0,pts=[],mobile=false;
+    var mouse={x:-9999,y:-9999,px:-9999,py:-9999,in:false,down:false};
+    var ripples=[],clock=0,last=performance.now(),lastRip=0;
+    var STOPS=[[26,58,28],[64,112,44],[150,184,92],[214,224,100],[250,243,168]];
+    function col(v,al){
+      v=Math.max(0,Math.min(.999,v));var f=v*4,i=Math.floor(f),k=f-i,a=STOPS[i],b=STOPS[i+1];
+      return 'rgba('+Math.round(a[0]+(b[0]-a[0])*k)+','+Math.round(a[1]+(b[1]-a[1])*k)+','+Math.round(a[2]+(b[2]-a[2])*k)+','+al.toFixed(3)+')';
+    }
+    function field(x,y,t){
+      var a=Math.sin(x*.0042+t*.55+Math.sin(y*.0031-t*.21)*2.1);
+      var b=Math.sin(y*.0058-t*.4+Math.cos(x*.0027+t*.17)*1.7);
+      var c=Math.sin((x+y)*.0021+t*.33);
+      return (a+b+c)/6+.5;
+    }
+    function layout(){
+      var r=hero.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(2,devicePixelRatio||1);
+      cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+      mobile=W<760;sp=Math.max(34,Math.min(58,Math.round(W/30)));
+      cols=Math.ceil(W/sp)+3;rows=Math.ceil(H/sp)+3;pts=[];
+      for(var r2=0;r2<rows;r2++)for(var c=0;c<cols;c++){var bx=(c-1)*sp,by=(r2-1)*sp;pts.push({bx:bx,by:by,x:bx,y:by,vx:0,vy:0,e:0})}
+    }
+    function ripple(x,y,t0){ripples.push({x:x,y:y,t:t0||0})}
+    function update(dt){
+      var R=mobile?110:175,ms=Math.hypot(mouse.x-mouse.px,mouse.y-mouse.py);
+      var rl=ripples;
+      for(var i=0;i<pts.length;i++){
+        var p=pts[i];
+        p.e*=.955;
+        for(var j=0;j<rl.length;j++){var q=rl[j],d=Math.hypot(p.bx-q.x,p.by-q.y),rr=q.t*430,g=(d-rr)/48;p.e+=Math.exp(-g*g)*.07*Math.max(0,1-q.t/2.3)}
+        if(mouse.in){
+          var dx=p.x-mouse.x,dy=p.y-mouse.y,d2=Math.hypot(dx,dy);
+          if(d2<R){var k=1-d2/R,n=d2||1;
+            p.vx+=dx/n*k*(mouse.down?2.4:.3);p.vy+=dy/n*k*(mouse.down?2.4:.3);
+            if(mouse.down){p.vx+=(mouse.x-mouse.px)*k*.32;p.vy+=(mouse.y-mouse.py)*k*.32}
+            p.e+=k*(mouse.down?.11:.025)+k*Math.min(ms*.012,.1);}
+        }
+        p.vx=(p.vx+(p.bx-p.x)*.06)*.86;p.vy=(p.vy+(p.by-p.y)*.06)*.86;p.x+=p.vx;p.y+=p.vy;
+      }
+      for(var m=rl.length-1;m>=0;m--){rl[m].t+=dt;if(rl[m].t>2.3)rl.splice(m,1)}
+      mouse.px=mouse.x;mouse.py=mouse.y;
+    }
+    function energy(p){return Math.min(1.3,field(p.bx,p.by,clock)*.74+p.e)}
+    function frame(now){
+      var dt=Math.min(.05,(now-last)/1000);last=now;
+      if(!paused){clock+=dt;
+        }
+      update(paused?0:dt);
+      ctx.clearRect(0,0,W,H);
+      // flowing gradient light under the grid
+      ctx.globalCompositeOperation='lighter';
+      var big=Math.max(W,H)*.42,tints=[[168,196,106],[214,224,98],[70,130,60]];
+      for(var g=0;g<3;g++){
+        var gx=W*(.5+.42*Math.sin(clock*.23+g*2.1)),gy=H*(.5+.36*Math.cos(clock*.19+g*1.7));
+        var rg=ctx.createRadialGradient(gx,gy,0,gx,gy,big);
+        rg.addColorStop(0,'rgba('+tints[g].join(',')+',.2)');rg.addColorStop(1,'rgba('+tints[g].join(',')+',0)');
+        ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+      }
+      ctx.globalCompositeOperation='source-over';
+      // grid lines
+      ctx.lineCap='round';
+      for(var r2=0;r2<rows;r2++)for(var c=0;c<cols;c++){
+        var i=r2*cols+c,a=pts[i],ea=energy(a);
+        var fade=mobile?1:Math.max(.4,Math.min(1,(a.bx/W-.06)/.5));
+        if(c<cols-1){var b=pts[i+1],v=(ea+energy(b))/2;ctx.strokeStyle=col(v,(.1+v*.5)*fade);ctx.lineWidth=.8+v*1.3;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}
+        if(r2<rows-1){var d=pts[i+cols],v2=(ea+energy(d))/2;ctx.strokeStyle=col(v2,(.1+v2*.5)*fade);ctx.lineWidth=.8+v2*1.3;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(d.x,d.y);ctx.stroke()}
+      }
+      // nodes + glow
+      ctx.globalCompositeOperation='lighter';
+      for(var k=0;k<pts.length;k++){
+        var p=pts[k],e=energy(p),fd=mobile?1:Math.max(.4,Math.min(1,(p.bx/W-.06)/.5));
+        if(e>.72){var rad=14+e*20,gr=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,rad);gr.addColorStop(0,col(e,.5*fd));gr.addColorStop(1,col(e,0));ctx.fillStyle=gr;ctx.beginPath();ctx.arc(p.x,p.y,rad,0,6.2832);ctx.fill()}
+        ctx.fillStyle=col(e,(.3+e*.65)*fd);ctx.beginPath();ctx.arc(p.x,p.y,1.1+e*2.6,0,6.2832);ctx.fill();
+      }
+      if(mouse.in){var mg=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,mouse.down?150:90);mg.addColorStop(0,'rgba(240,238,134,'+(mouse.down?.3:.16)+')');mg.addColorStop(1,'rgba(240,238,134,0)');ctx.fillStyle=mg;ctx.fillRect(mouse.x-160,mouse.y-160,320,320)}
+      ctx.globalCompositeOperation='source-over';
+    }
+    var raf=null,visible=true;
+    function loop(now){frame(now);raf=requestAnimationFrame(loop)}
+    function start(){if(raf||paused||!visible)return;last=performance.now();raf=requestAnimationFrame(loop)}
+    function stop(){if(raf){cancelAnimationFrame(raf);raf=null}}
+    function still(){ripples=[];mouse.in=false;mouse.down=false;pts.forEach(function(p){p.e=0;p.x=p.bx;p.y=p.by;p.vx=p.vy=0});frame(performance.now())}
+    layout();
+    if(paused)still();else start();
+    addEventListener('resize',function(){layout();if(paused)still()});
+    hero.addEventListener('pointermove',function(e){if(paused)return;var r=hero.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;if(!mouse.in){mouse.px=mouse.x;mouse.py=mouse.y}mouse.in=true});
+    hero.addEventListener('pointerleave',function(){mouse.in=false;mouse.down=false});
+    hero.addEventListener('pointerdown',function(e){
+      if(e.target.closest('button,a')||paused)return;
+      var r=hero.getBoundingClientRect();mouse.x=mouse.px=e.clientX-r.left;mouse.y=mouse.py=e.clientY-r.top;mouse.in=true;mouse.down=true;
+      ripple(mouse.x,mouse.y,0);
+    });
+    addEventListener('pointerup',function(){mouse.down=false});
+    addEventListener('pointercancel',function(){mouse.down=false});
+    new IntersectionObserver(function(en){visible=en[0].isIntersecting;if(visible)start();else stop()}).observe(hero);
+    var pb=$('#pause');
+    if(reduce){pb.setAttribute('aria-pressed','true');pb.textContent='Play motion'}
+    document.body.classList.toggle('still',paused);
+    pb.addEventListener('click',function(){
+      paused=!paused;document.body.classList.toggle('still',paused);pb.setAttribute('aria-pressed',String(paused));pb.textContent=paused?'Play motion':'Pause motion';
+      if(paused){stop();still()}else{ripples=[];start()}
+    });
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){layout();if(paused)still()});
+  })();
+
+  /* ---------- pencil X draws on scroll ---------- */
+  (function(){
+    var vs=$('.vs');if(!vs)return;
+    if(reduce||!('IntersectionObserver' in window)){vs.classList.add('draw');return}
+    new IntersectionObserver(function(en,ob){if(en[0].isIntersecting){vs.classList.add('draw');ob.disconnect()}},{threshold:.55}).observe(vs);
+  })();
+
+  /* ---------- corkboard canvas ---------- */
+  (function(){
+    var cv=$('#aff'),world=$('#world'),gPre=$('#gPre'),gUser=$('#gUser'),tmp=$('#gTemp');
+    if(!cv)return;
+    var W=1800,H=1560,px=0,py=0,pan=null,drag=null,users=[];
+    function clamp(){var cw=cv.clientWidth,ch=cv.clientHeight;px=Math.min(0,Math.max(px,cw-W));py=Math.min(0,Math.max(py,ch-H))}
+    function apply(){clamp();world.style.transform='translate('+px+'px,'+py+'px)'}
+    function center(el){var r=el.getBoundingClientRect(),w=world.getBoundingClientRect();return {x:r.left-w.left+r.width/2,y:r.top-w.top+r.height/2}}
+    function pinById(id){return world.querySelector('[data-pin="'+id+'"]')}
+    function curve(a,b){var mx=(a.x+b.x)/2,my=(a.y+b.y)/2,d=Math.hypot(a.x-b.x,a.y-b.y);return 'M'+a.x+' '+a.y+'Q'+mx+' '+(my+Math.min(70,d*.16))+' '+b.x+' '+b.y}
+    var PRE=[['hunt-b','ph1'],['hand-b','ph2'],['trust-b','ph3']],START={x:-48,y:-34};px=START.x;py=START.y;
+    function draw(){
+      gPre.innerHTML='';gUser.innerHTML='';
+      PRE.forEach(function(p,i){var a=pinById(p[0]),b=pinById(p[1]);if(!a||!b)return;var ca=center(a),cb=center(b);svgEl('path',{class:'str',d:curve(ca,cb)},gPre);var st=world.querySelector('[data-str="'+i+'"]');if(st){var mx=(ca.x+cb.x)/2,sag=Math.min(70,Math.hypot(ca.x-cb.x,ca.y-cb.y)*.16),my=.25*ca.y+.5*((ca.y+cb.y)/2+sag)+.25*cb.y;st.style.left=(mx-st.offsetWidth/2)+'px';st.style.top=(my-6)+'px'}});
+      users.forEach(function(u,i){var a=pinById(u[0]),b=pinById(u[1]);if(!a||!b)return;var d=curve(center(a),center(b));svgEl('path',{class:'usr',d:d},gUser);var h=svgEl('path',{class:'hit',d:d},gUser);h.addEventListener('click',function(e){e.stopPropagation();users.splice(i,1);draw()})});
+    }
+    function toWorld(e){var w=world.getBoundingClientRect();return {x:e.clientX-w.left,y:e.clientY-w.top}}
+    cv.addEventListener('pointerdown',function(e){
+      if(e.target.closest('.cv-tools'))return;
+      var pin=e.target.closest('.pin');
+      cv.setPointerCapture(e.pointerId);
+      if(pin){drag={from:pin.getAttribute('data-pin'),el:pin};tmp.setAttribute('d','');e.preventDefault()}
+      else{pan={x:e.clientX,y:e.clientY,ox:px,oy:py};cv.classList.add('panning')}
+    });
+    cv.addEventListener('pointermove',function(e){
+      if(drag){
+        tmp.setAttribute('d',curve(center(drag.el),toWorld(e)));
+        $$('.pin.hot',cv).forEach(function(p){p.classList.remove('hot')});
+        var t=document.elementFromPoint(e.clientX,e.clientY),pn=t&&t.closest&&t.closest('.pin');
+        if(pn&&pn!==drag.el)pn.classList.add('hot');
+      }else if(pan){px=pan.ox+(e.clientX-pan.x);py=pan.oy+(e.clientY-pan.y);apply()}
+    });
+    function end(e){
+      if(drag){
+        var t=document.elementFromPoint(e.clientX,e.clientY),pn=t&&t.closest&&t.closest('.pin');
+        if(pn&&pn.getAttribute('data-pin')!==drag.from){
+          var a=drag.from,b=pn.getAttribute('data-pin');
+          if(!users.some(function(u){return (u[0]===a&&u[1]===b)||(u[0]===b&&u[1]===a)}))users.push([a,b]);
+        }
+        $$('.pin.hot',cv).forEach(function(p){p.classList.remove('hot')});
+        drag=null;tmp.setAttribute('d','');draw();
+      }
+      pan=null;cv.classList.remove('panning');
+    }
+    cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+    cv.addEventListener('keydown',function(e){
+      var k={ArrowLeft:[60,0],ArrowRight:[-60,0],ArrowUp:[0,60],ArrowDown:[0,-60]}[e.key];
+      if(k){px+=k[0];py+=k[1];apply();e.preventDefault()}
+    });
+    $('#cvReset').addEventListener('click',function(){px=START.x;py=START.y;apply()});
+    $('#cvClear').addEventListener('click',function(){users=[];draw()});
+    var rz;addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(function(){apply();draw()},120)});
+    apply();draw();
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
+    addEventListener('load',draw);
+  })();
+
+  /* ---------- mouse interactions across sections ---------- */
+  (function(){
+    if(reduce||!matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+    var hero=$('#top');
+    hero.addEventListener('pointermove',function(e){var r=hero.getBoundingClientRect();hero.style.setProperty('--mx',((e.clientX-r.left)/r.width*2-1).toFixed(3));hero.style.setProperty('--my',((e.clientY-r.top)/r.height*2-1).toFixed(3))});
+    hero.addEventListener('pointerleave',function(){hero.style.setProperty('--mx',0);hero.style.setProperty('--my',0)});
+
+    // tilt + spotlight on cards
+    $$('.card,.step,.vs>div,.swap>.exp,.swap>.act').forEach(function(el){
+      el.classList.add('tilt');
+      var sp=document.createElement('i');sp.className='spot';sp.setAttribute('aria-hidden','true');el.appendChild(sp);
+      el.addEventListener('pointermove',function(e){
+        var r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+        el.style.setProperty('--ry',((x-.5)*8).toFixed(2)+'deg');el.style.setProperty('--rx',((.5-y)*6).toFixed(2)+'deg');
+        el.style.setProperty('--mx',(x*100).toFixed(1)+'%');el.style.setProperty('--my',(y*100).toFixed(1)+'%');
+      });
+      el.addEventListener('pointerleave',function(){el.style.setProperty('--rx','0deg');el.style.setProperty('--ry','0deg')});
+    });
+
+    // cursor-following preview on the principles list
+    var info={
+      1:['Moves information','Teams stop hunting for data other teams already sourced.'],
+      2:['Human final call','AI collects, stores and retrieves. People decide.'],
+      3:['One protocol','Role-based access, adjustable by a designated third party.'],
+      4:['Traceable','Every item links to its source. Only what is shared is captured.']
+    };
+    var fol=document.createElement('div');fol.className='follow';fol.setAttribute('aria-hidden','true');document.body.appendChild(fol);
+    var fx=0,fy=0,tx=0,ty=0,fr=null;
+    function fl(){fx+=(tx-fx)*.2;fy+=(ty-fy)*.2;fol.style.transform='translate3d('+(fx+28)+'px,'+(fy+24)+'px,0)';
+      if(Math.abs(tx-fx)>.4||Math.abs(ty-fy)>.4)fr=requestAnimationFrame(fl);else fr=null}
+    $$('#princ button').forEach(function(b){
+      var k=b.getAttribute('data-p');
+      b.addEventListener('pointerenter',function(e){
+        var d=info[k];fol.innerHTML='<div class="fg" style="--gx:'+(k*22)+'%"></div><span class="fm">'+d[0]+'</span><div class="ft">'+d[1]+'</div>';
+        fx=tx=e.clientX;fy=ty=e.clientY;fol.style.transform='translate3d('+(fx+28)+'px,'+(fy+24)+'px,0)';fol.classList.add('show')});
+      b.addEventListener('pointermove',function(e){tx=e.clientX;ty=e.clientY;if(!fr)fr=requestAnimationFrame(fl)});
+      b.addEventListener('pointerleave',function(){fol.classList.remove('show')});
+    });
+
+    // variable-weight headlines react to the cursor
+    function split(el){
+      el.setAttribute('aria-label',el.textContent.replace(/\s+/g,' ').trim());
+      (function walk(node){
+        Array.prototype.slice.call(node.childNodes).forEach(function(n){
+          if(n.nodeType===3){
+            var frag=document.createDocumentFragment();
+            n.textContent.split(/(\s+)/).forEach(function(tok){
+              if(!tok)return;
+              if(/^\s+$/.test(tok)){frag.appendChild(document.createTextNode(' '));return}
+              var w=document.createElement('span');w.style.cssText='display:inline-block;white-space:nowrap';w.setAttribute('aria-hidden','true');
+              Array.prototype.forEach.call(tok,function(c){var s=document.createElement('span');s.className='ch';s.textContent=c;w.appendChild(s)});
+              frag.appendChild(w);
+            });
+            n.parentNode.replaceChild(frag,n);
+          } else if(n.nodeType===1){walk(n)}
+        });
+      })(el);
+    }
+    var heads=[];
+    [['.hero h1',480],['.huge',520],['footer .big',520]].forEach(function(h){
+      var el=$(h[0]);if(!el)return;
+      var base=parseInt(getComputedStyle(el).fontWeight,10)||300;
+      split(el);heads.push({el:el,base:base,max:h[1],chars:$$('.ch',el)});
+    });
+    var pend=false,mx=0,my=0;
+    function apply(){pend=false;
+      heads.forEach(function(h){
+        var hr=h.el.getBoundingClientRect();if(hr.bottom<-50||hr.top>innerHeight+50)return;
+        h.chars.forEach(function(c){
+          var r=c.getBoundingClientRect(),d=Math.hypot(mx-(r.left+r.width/2),my-(r.top+r.height/2)),k=Math.max(0,1-d/190);
+          c.style.fontWeight=Math.round(h.base+(h.max-h.base)*k*k);
+        });
+      });
+    }
+    addEventListener('pointermove',function(e){mx=e.clientX;my=e.clientY;if(!pend){pend=true;requestAnimationFrame(apply)}},{passive:true});
+
+    // 5% dots swell near the cursor
+    var q=$('.quote'),dts=$$('#dots20 span');
+    if(q)q.addEventListener('pointermove',function(e){
+      dts.forEach(function(s){var r=s.getBoundingClientRect(),d=Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2));
+        s.style.transform='scale('+(1+.14*Math.max(0,1-d/90)).toFixed(3)+')'});
+    });
+    if(q)q.addEventListener('pointerleave',function(){dts.forEach(function(s){s.style.transform=''})});
+
+    // role chips lean toward the cursor
+    var rw=$('.rolewrap'),rl=$$('.role');
+    if(rw){rw.addEventListener('pointermove',function(e){
+      rl.forEach(function(c){var r=c.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy);
+        if(d<170){var f=(1-d/170)*.22;c.style.transform='translate('+(dx*f).toFixed(1)+'px,'+(dy*f).toFixed(1)+'px)'}else c.style.transform=''});
+    });
+    rw.addEventListener('pointerleave',function(){rl.forEach(function(c){c.style.transform=''})})}
+  })();
+
+  onScroll();
+})();
+</script>
+</body>
+</html>
